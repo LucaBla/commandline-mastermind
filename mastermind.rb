@@ -3,10 +3,11 @@ module Mastermind
     attr_accessor :code
     attr_reader :feedback
 
-    @possible_code_chars = %w[x y o w z f]
+    @possible_code_chars = %w[q w e r t y]
 
     def initialize
       @rounds = 0
+      @round_counter = 1
       @turns = 8
       @players = []
       @codemaker = ''
@@ -26,6 +27,7 @@ module Mastermind
       @rounds.times do
         play_round
         reset_gameover
+        @round_counter += 1
       end
     end
 
@@ -52,47 +54,59 @@ module Mastermind
 
     def play_round
       code = @codemaker.create_code
+      @turn_counter = 1
       @turns.times do
-        marked_guesses = []
+        marked_guesses_1 = []
         guess = @codebreaker.make_guess
         @feedback = [' ', ' ', ' ', ' ']
-        calculate_feedback(code, guess, marked_guesses)
+        calculate_feedback(code, guess, marked_guesses_1)
         sleep 1
         print_gui(code, guess)
         set_gameover(code, guess)
         break if gameover?
+
+        @codemaker.points += 1
+        @turn_counter += 1
+      end
+      if @codebreaker == @players[0]
+        puts "The right code is: #{code}\n"
       end
       @codemaker, @codebreaker = @codebreaker, @codemaker
     end
 
-    def calculate_feedback(code, guess, marked_guesses)
+    def calculate_feedback(code, guess, marked_guesses_1)
+      marked_guesses_0 = []
       guess.each_index do |guess_index|
         if guess[guess_index] == code[guess_index]
           @feedback[guess_index] = '1'
-          marked_guesses.push(guess_index)
-        else
-          puts ''
-          p marked_guesses
-          code.each_index do |code_index|
-            if guess[guess_index] == code[code_index] && !marked_guesses.include?(code_index)
-              @feedback[guess_index] = '0'
-              marked_guesses.push(code_index)
-            end
+          marked_guesses_1.push(guess_index)
+        end
+      end
+      guess.each_index do |guess_index|  
+        code.each_index do |code_index|
+          if guess[guess_index] == code[code_index] && !marked_guesses_1.include?(code_index) && !marked_guesses_1.include?(guess_index) && !marked_guesses_0.include?(code_index)
+            @feedback[guess_index] = '0'
+            marked_guesses_0.push(code_index)
           end
         end
       end
     end
 
     def print_gui(code, guess)
-      puts ''
-      puts ''
-      puts ''
-      puts 'code:'
-      p code
-      puts ''
-      puts 'Guess:'
+      puts "\n--------------------\n\n\n\nRounds: #{@round_counter}"
+      puts "Turns: #{@turn_counter}"
+      puts "\nCodemakers Points: #{@codemaker.points}"
+      puts "Codebreakers Points: #{@codebreaker.points}"
+      puts "\nCode:"
+      if @codebreaker == @players[0]
+        print "[\"*\", \"*\", \"*\", \"*\"]\n"
+      else
+        p code
+      end
+      puts "\nGuess:"
       p guess
-      p @feedback
+      puts 'Feedback:'
+      print "#{@feedback}\n\n\n\n--------------------\n\n"
     end
 
     def gameover?
@@ -112,6 +126,8 @@ module Mastermind
   end
 
   class Player
+    attr_accessor :points
+
     def initialize(game)
       @game = game
       @points = 0
