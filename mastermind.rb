@@ -34,6 +34,7 @@ module Mastermind
     def setup_game
       puts 'How many Rounds of Mastermind do you want to play?'
       @rounds = gets.chomp.to_i
+      system('clear')
       @players = [Player.new(self), ComputerPlayer.new(self)]
       select_codemaker
     end
@@ -50,6 +51,7 @@ module Mastermind
       else
         select_codemaker
       end
+      system('clear')
     end
 
     def play_round
@@ -93,6 +95,7 @@ module Mastermind
     end
 
     def print_gui(code, guess)
+      system('clear')
       puts "\n--------------------\n\n\n\nRounds: #{@round_counter}"
       puts "Turns: #{@turn_counter}"
       puts "\nCodemakers Points: #{@codemaker.points}"
@@ -137,7 +140,7 @@ module Mastermind
 
     def create_code
       valid_code = true
-      puts 'pls create your Code using the allowed characters.'
+      puts 'pls create your Code (4 digits) using the allowed characters.'
       puts "Allowed characters: #{Game.possible_code_chars}"
       new_code = gets.chomp.split(//)
       new_code.each do |char|
@@ -152,7 +155,7 @@ module Mastermind
 
     def make_guess
       valid_guess = true
-      puts 'pls enter your guess.'
+      puts 'pls enter your guess.(4 digits)'
       guess = gets.chomp.split(//)
       guess.each do |char|
         if !Game.possible_code_chars.include?(char) || guess.length !=4
@@ -178,7 +181,7 @@ module Mastermind
         end
       end
       # guess = Game.possible_code_chars.sample(4)
-      
+
       @last_guess
     end
   end
